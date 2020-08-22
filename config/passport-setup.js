@@ -1,5 +1,6 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const FacebookStrategy = require("passport-facebook").Strategy;
 const keys = require("./keys");
 const User = require("../models/user.model");
 
@@ -13,6 +14,34 @@ passport.deserializeUser((id, done) => {
     done(null, user); // а тут его берем
   });
 });
+
+passport.use(
+  new FacebookStrategy(
+    {
+      callbackURL: "/auth/facebook/redirect",
+      clientID: keys.facebook.clientID,
+      clientSecret: keys.facebook.clientSecret,
+    },
+    (accessToken, refreshToken, profile, done) => {
+      console.log(profile);
+      User.findOne({ facebookId: profile.id }).then((currentUser) => {
+        if (currentUser) {
+          done(null, currentUser);
+        } else {
+          new User({
+            username: profile.displayName,
+            facebookId: profile.id,
+          })
+            .save()
+            .then((newUser) => {
+              console.log(`New user created ${newUser}`);
+              done(null, newUser);
+            });
+        }
+      });
+    }
+  )
+);
 
 passport.use(
   new GoogleStrategy(
@@ -34,7 +63,6 @@ passport.use(
           new User({
             username: profile.displayName,
             googleId: profile.id,
-            thumbnail: profile._json.picture,
           })
             .save()
             .then((newUser) => {
@@ -46,3 +74,5 @@ passport.use(
     }
   )
 );
+
+passport;
