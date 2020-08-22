@@ -3,6 +3,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
 const keys = require("./keys");
 const User = require("../models/user.model");
+const GithubStrategy = require("passport-github").Strategy;
 
 // этот метод вызывается для сохранения в куку
 passport.serializeUser((user, done) => {
@@ -63,6 +64,38 @@ passport.use(
           new User({
             username: profile.displayName,
             googleId: profile.id,
+          })
+            .save()
+            .then((newUser) => {
+              console.log(`new user created ${newUser}`);
+              done(null, newUser); // здесь будет использоваться passport.serializeUser
+            });
+        }
+      });
+    }
+  )
+);
+
+passport.use(
+  new GithubStrategy(
+    {
+      // options for github strategy
+      callbackURL: "/auth/github/redirect",
+      clientID: keys.github.clientID,
+      clientSecret: keys.github.clientSecret,
+    },
+    (accessToken, refreshToken, profile, done) => {
+      // passport callback function
+      // check if user already exists
+      console.log(profile);
+      User.findOne({ githubId: profile.id }).then((currentUser) => {
+        if (currentUser) {
+          // already have the user
+          done(null, currentUser); // здесь будет использоваться passport.serializeUser
+        } else {
+          new User({
+            username: profile.displayName,
+            githubId: profile.id,
           })
             .save()
             .then((newUser) => {
