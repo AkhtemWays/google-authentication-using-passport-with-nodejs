@@ -44,4 +44,14 @@ router.get("/github/redirect", passport.authenticate("github"), (req, res) => {
   res.redirect("/profile/");
 });
 
+// ------------------------------- vkontakte
+router.get("/vkontakte", passport.authenticate("vkontakte"));
+router.get(
+  "/vkontakte/redirect",
+  passport.authenticate("vkontakte"),
+  (req, res) => {
+    res.redirect("/profile/");
+  }
+);
+
 module.exports = router;

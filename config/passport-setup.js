@@ -4,6 +4,7 @@ const FacebookStrategy = require("passport-facebook").Strategy;
 const keys = require("./keys");
 const User = require("../models/user.model");
 const GithubStrategy = require("passport-github").Strategy;
+const VKontakteStrategy = require("passport-vkontakte").Strategy;
 
 // этот метод вызывается для сохранения в куку
 passport.serializeUser((user, done) => {
@@ -96,6 +97,38 @@ passport.use(
           new User({
             username: profile.displayName,
             githubId: profile.id,
+          })
+            .save()
+            .then((newUser) => {
+              console.log(`new user created ${newUser}`);
+              done(null, newUser); // здесь будет использоваться passport.serializeUser
+            });
+        }
+      });
+    }
+  )
+);
+
+passport.use(
+  new VKontakteStrategy(
+    {
+      // options for vkontakte strategy
+      callbackURL: "/auth/vkontakte/redirect",
+      clientID: keys.vkontakte.clientID,
+      clientSecret: keys.vkontakte.clientSecret,
+    },
+    (accessToken, refreshToken, profile, done) => {
+      // passport callback function
+      // check if user already exists
+      console.log(profile);
+      User.findOne({ vkontakteId: profile.id }).then((currentUser) => {
+        if (currentUser) {
+          // already have the user
+          done(null, currentUser); // здесь будет использоваться passport.serializeUser
+        } else {
+          new User({
+            username: profile.displayName,
+            vkontakteId: profile.id,
           })
             .save()
             .then((newUser) => {
