@@ -1,2 +1,3 @@
-# oauth-playlist
-Course files for The Net Ninja OAuth playlist on YouTube
+## User authentication with google platform using nodejs and passport
+
+credit to https://github.com/iamshaunjp
