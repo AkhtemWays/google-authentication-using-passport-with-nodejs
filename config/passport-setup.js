@@ -5,6 +5,7 @@ const keys = require("./keys");
 const User = require("../models/user.model");
 const GithubStrategy = require("passport-github").Strategy;
 const VKontakteStrategy = require("passport-vkontakte").Strategy;
+const TwitterStrategy = require("passport-twitter").Strategy;
 
 // этот метод вызывается для сохранения в куку
 passport.serializeUser((user, done) => {
@@ -129,6 +130,38 @@ passport.use(
           new User({
             username: profile.displayName,
             vkontakteId: profile.id,
+          })
+            .save()
+            .then((newUser) => {
+              console.log(`new user created ${newUser}`);
+              done(null, newUser); // здесь будет использоваться passport.serializeUser
+            });
+        }
+      });
+    }
+  )
+);
+
+passport.use(
+  new TwitterStrategy(
+    {
+      // options for twitter strategy
+      callbackURL: "/auth/twitter/redirect",
+      clientID: keys.twitter.clientID,
+      clientSecret: keys.twitter.clientSecret,
+    },
+    (accessToken, refreshToken, profile, done) => {
+      // passport callback function
+      // check if user already exists
+      console.log(profile);
+      User.findOne({ twitterId: profile.id }).then((currentUser) => {
+        if (currentUser) {
+          // already have the user
+          done(null, currentUser); // здесь будет использоваться passport.serializeUser
+        } else {
+          new User({
+            username: profile.displayName,
+            twitterId: profile.id,
           })
             .save()
             .then((newUser) => {

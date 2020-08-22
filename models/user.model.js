@@ -6,6 +6,7 @@ const userSchema = new Schema({
   googleId: String,
   facebookId: String,
   githubId: String,
+  vkontakteId: String,
 });
 
 const User = mongoose.model("users", userSchema);

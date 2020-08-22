@@ -54,4 +54,14 @@ router.get(
   }
 );
 
+// ------------------------------- twitter
+router.get("/twitter", passport.authenticate("twitter"));
+router.get(
+  "/twitter/redirect",
+  passport.authenticate("twitter"),
+  (req, res) => {
+    res.redirect("/profile/");
+  }
+);
+
 module.exports = router;
